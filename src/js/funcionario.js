@@ -43,6 +43,13 @@ class Funcionario {
         this.#salario = Number(valor);
     }
 
+    atualizar(nome, idade, cargo, salario) {
+        this.nome = nome;
+        this.idade = idade;
+        this.cargo = cargo;
+        this.salario = salario;
+    }
+
     salarioFormatado() {
         return this.#salario.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
