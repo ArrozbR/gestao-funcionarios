@@ -12,6 +12,8 @@ const btnCancelar = document.getElementById("btnCancelar");
 const tituloFormulario = document.getElementById("tituloFormulario");
 const tabela = document.getElementById("tabelaFuncionarios");
 const mensagemVazia = document.getElementById("mensagemVazia");
+const tituloRelatorio = document.getElementById("tituloRelatorio");
+const resultadoRelatorio = document.getElementById("resultadoRelatorio");
 
 const buscarPorId = (id) => funcionarios.find((funcionario) => funcionario.id === id);
 
@@ -143,8 +145,55 @@ const excluir = (id) => {
     listar();
 };
 
+const formatarMoeda = (valor) =>
+    valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const mostrarRelatorio = (titulo, linhas) => {
+    tituloRelatorio.textContent = titulo;
+    resultadoRelatorio.innerHTML = "";
+
+    const itens = linhas.length > 0 ? linhas : ["Nenhum funcionário para mostrar."];
+    itens.forEach((linha) => {
+        const li = document.createElement("li");
+        li.textContent = linha;
+        resultadoRelatorio.appendChild(li);
+    });
+};
+
+const relatorioSalarioAlto = () => {
+    const lista = funcionarios
+        .filter((funcionario) => funcionario.salario > 5000)
+        .map((funcionario) => funcionario.toString());
+    mostrarRelatorio(`Salário acima de R$ 5.000 (${lista.length})`, lista);
+};
+
+const relatorioMediaSalarial = () => {
+    if (funcionarios.length === 0) {
+        mostrarRelatorio("Média salarial", []);
+        return;
+    }
+
+    const total = funcionarios.reduce((soma, funcionario) => soma + funcionario.salario, 0);
+    mostrarRelatorio("Média salarial", [formatarMoeda(total / funcionarios.length)]);
+};
+
+const relatorioCargosUnicos = () => {
+    const cargos = [...new Set(funcionarios.map((funcionario) => funcionario.cargo))];
+    mostrarRelatorio(`Cargos únicos (${cargos.length})`, cargos);
+};
+
+const relatorioNomesMaiusculo = () => {
+    const nomes = funcionarios.map((funcionario) => funcionario.nome.toUpperCase());
+    mostrarRelatorio("Nomes em maiúsculo", nomes);
+};
+
 btnSalvar.addEventListener("click", () => salvar());
 btnCancelar.addEventListener("click", () => limparFormulario());
 campoBusca.addEventListener("input", () => listar());
+
+document.getElementById("btnSalarioAlto").addEventListener("click", () => relatorioSalarioAlto());
+document.getElementById("btnMediaSalarial").addEventListener("click", () => relatorioMediaSalarial());
+document.getElementById("btnCargosUnicos").addEventListener("click", () => relatorioCargosUnicos());
+document.getElementById("btnNomesMaiusculo").addEventListener("click", () => relatorioNomesMaiusculo());
 
 listar();
