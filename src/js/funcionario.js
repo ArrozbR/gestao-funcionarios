@@ -1,14 +1,22 @@
 class Funcionario {
+    static #proximoId = 1;
+
+    #id;
     #nome;
     #idade;
     #cargo;
     #salario;
 
     constructor(nome, idade, cargo, salario) {
+        this.#id = Funcionario.#proximoId++;
         this.nome = nome;
         this.idade = idade;
         this.cargo = cargo;
         this.salario = salario;
+    }
+
+    get id() {
+        return this.#id;
     }
 
     get nome() {
@@ -55,6 +63,6 @@ class Funcionario {
     }
 
     toString() {
-        return `${this.#nome}, ${this.#idade} anos, ${this.#cargo}, ${this.salarioFormatado()}`;
+        return `#${this.#id} - ${this.#nome}, ${this.#idade} anos, ${this.#cargo}, ${this.salarioFormatado()}`;
     }
 }

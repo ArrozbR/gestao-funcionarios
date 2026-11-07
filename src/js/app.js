@@ -1,120 +1,150 @@
-var funcionarios = [];
-var indiceEdicao = null;
+let funcionarios = [];
+let idEdicao = null;
 
-function lerCampos() {
-    return {
-        nome: document.getElementById("nome").value.trim(),
-        idade: document.getElementById("idade").value,
-        cargo: document.getElementById("cargo").value.trim(),
-        salario: document.getElementById("salario").value
-    };
-}
+const form = document.getElementById("formFuncionario");
+const campoNome = document.getElementById("nome");
+const campoIdade = document.getElementById("idade");
+const campoCargo = document.getElementById("cargo");
+const campoSalario = document.getElementById("salario");
+const campoBusca = document.getElementById("busca");
+const btnSalvar = document.getElementById("btnSalvar");
+const btnCancelar = document.getElementById("btnCancelar");
+const tituloFormulario = document.getElementById("tituloFormulario");
+const tabela = document.getElementById("tabelaFuncionarios");
+const mensagemVazia = document.getElementById("mensagemVazia");
 
-function salvar() {
-    var dados = lerCampos();
+const buscarPorId = (id) => funcionarios.find((funcionario) => funcionario.id === id);
 
-    if (dados.nome === "" || dados.idade === "" || dados.cargo === "" || dados.salario === "") {
-        alert("Preencha todos os campos.");
-        return;
-    }
+const buscarPorNome = (texto) =>
+    funcionarios.filter((funcionario) =>
+        funcionario.nome.toLowerCase().includes(texto.trim().toLowerCase())
+    );
 
-    if (indiceEdicao === null) {
-        var novo = new Funcionario(dados.nome, dados.idade, dados.cargo, dados.salario);
-        funcionarios.push(novo);
-        console.log("Cadastrado: " + novo.toString());
-    } else {
-        var funcionario = funcionarios[indiceEdicao];
-        funcionario.atualizar(dados.nome, dados.idade, dados.cargo, dados.salario);
-        console.log("Atualizado: " + funcionario.toString());
-    }
+const adicionar = (funcionario) => {
+    funcionarios = [...funcionarios, funcionario];
+};
 
-    limparFormulario();
-    listar();
-}
+const removerPorId = (id) => {
+    funcionarios = funcionarios.filter((funcionario) => funcionario.id !== id);
+};
 
-function editar(indice) {
-    var funcionario = funcionarios[indice];
+const atualizarPorId = (id, dados) => {
+    const funcionario = buscarPorId(id);
+    funcionario.atualizar(dados.nome, dados.idade, dados.cargo, dados.salario);
+    return funcionario;
+};
 
-    document.getElementById("nome").value = funcionario.nome;
-    document.getElementById("idade").value = funcionario.idade;
-    document.getElementById("cargo").value = funcionario.cargo;
-    document.getElementById("salario").value = funcionario.salario;
+const lerCampos = () => ({
+    nome: campoNome.value.trim(),
+    idade: campoIdade.value,
+    cargo: campoCargo.value.trim(),
+    salario: campoSalario.value
+});
 
-    indiceEdicao = indice;
-    document.getElementById("tituloFormulario").textContent = "Editar Funcionário";
-    document.getElementById("btnSalvar").textContent = "Salvar alterações";
-    document.getElementById("btnCancelar").hidden = false;
-}
+const camposPreenchidos = (dados) => Object.values(dados).every((valor) => valor !== "");
 
-function excluir(indice) {
-    var funcionario = funcionarios[indice];
+const limparFormulario = () => {
+    form.reset();
+    idEdicao = null;
+    tituloFormulario.textContent = "Cadastrar Funcionário";
+    btnSalvar.textContent = "Cadastrar";
+    btnCancelar.hidden = true;
+};
 
-    if (!confirm("Deseja excluir " + funcionario.nome + "?")) {
-        return;
-    }
-
-    funcionarios.splice(indice, 1);
-    console.log("Excluído: " + funcionario.toString());
-    limparFormulario();
-    listar();
-}
-
-function limparFormulario() {
-    document.getElementById("formFuncionario").reset();
-    indiceEdicao = null;
-    document.getElementById("tituloFormulario").textContent = "Cadastrar Funcionário";
-    document.getElementById("btnSalvar").textContent = "Cadastrar";
-    document.getElementById("btnCancelar").hidden = true;
-}
-
-function criarCelula(texto) {
-    var td = document.createElement("td");
+const criarCelula = (texto) => {
+    const td = document.createElement("td");
     td.textContent = texto;
     return td;
-}
+};
 
-function criarBotao(texto) {
-    var botao = document.createElement("button");
+const criarBotao = (texto, aoClicar) => {
+    const botao = document.createElement("button");
     botao.type = "button";
     botao.textContent = texto;
+    botao.addEventListener("click", aoClicar);
     return botao;
-}
+};
 
-function listar() {
-    var tabela = document.getElementById("tabelaFuncionarios");
+const listar = () => {
+    const lista = buscarPorNome(campoBusca.value);
     tabela.innerHTML = "";
 
-    funcionarios.forEach(function (funcionario, indice) {
-        var tr = document.createElement("tr");
+    mensagemVazia.hidden = lista.length > 0;
+    mensagemVazia.textContent = funcionarios.length === 0
+        ? "Nenhum funcionário cadastrado."
+        : "Nenhum funcionário encontrado com esse nome.";
 
+    lista.forEach((funcionario) => {
+        const tr = document.createElement("tr");
+
+        tr.appendChild(criarCelula(funcionario.id));
         tr.appendChild(criarCelula(funcionario.nome));
         tr.appendChild(criarCelula(funcionario.idade));
         tr.appendChild(criarCelula(funcionario.cargo));
         tr.appendChild(criarCelula(funcionario.salarioFormatado()));
 
-        var btnEditar = criarBotao("Editar");
-        btnEditar.onclick = function () {
-            editar(indice);
-        };
-
-        var btnExcluir = criarBotao("Excluir");
-        btnExcluir.onclick = function () {
-            excluir(indice);
-        };
-
-        var acoes = document.createElement("td");
-        acoes.appendChild(btnEditar);
-        acoes.appendChild(btnExcluir);
+        const acoes = document.createElement("td");
+        acoes.appendChild(criarBotao("Editar", () => editar(funcionario.id)));
+        acoes.appendChild(criarBotao("Excluir", () => excluir(funcionario.id)));
         tr.appendChild(acoes);
 
         tabela.appendChild(tr);
     });
-}
-
-document.getElementById("btnSalvar").onclick = function () {
-    salvar();
 };
 
-document.getElementById("btnCancelar").onclick = function () {
+const salvar = () => {
+    const dados = lerCampos();
+
+    if (!camposPreenchidos(dados)) {
+        alert("Preencha todos os campos.");
+        return;
+    }
+
+    if (idEdicao === null) {
+        const novo = new Funcionario(dados.nome, dados.idade, dados.cargo, dados.salario);
+        adicionar(novo);
+        console.log("Cadastrado:", novo.toString());
+    } else {
+        const atualizado = atualizarPorId(idEdicao, dados);
+        console.log("Atualizado:", atualizado.toString());
+    }
+
     limparFormulario();
+    listar();
 };
+
+const editar = (id) => {
+    const funcionario = buscarPorId(id);
+
+    campoNome.value = funcionario.nome;
+    campoIdade.value = funcionario.idade;
+    campoCargo.value = funcionario.cargo;
+    campoSalario.value = funcionario.salario;
+
+    idEdicao = id;
+    tituloFormulario.textContent = `Editar Funcionário #${id}`;
+    btnSalvar.textContent = "Salvar alterações";
+    btnCancelar.hidden = false;
+};
+
+const excluir = (id) => {
+    const funcionario = buscarPorId(id);
+
+    if (!confirm(`Deseja excluir ${funcionario.nome}?`)) {
+        return;
+    }
+
+    removerPorId(id);
+    console.log("Excluído:", funcionario.toString());
+
+    if (idEdicao === id) {
+        limparFormulario();
+    }
+    listar();
+};
+
+btnSalvar.addEventListener("click", () => salvar());
+btnCancelar.addEventListener("click", () => limparFormulario());
+campoBusca.addEventListener("input", () => listar());
+
+listar();

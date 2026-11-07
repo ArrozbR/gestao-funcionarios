@@ -33,9 +33,14 @@
     </form>
 
     <h2>Funcionários</h2>
+    <p>
+        <label for="busca">Buscar por nome:</label>
+        <input type="text" id="busca">
+    </p>
     <table border="1">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Nome</th>
                 <th>Idade</th>
                 <th>Cargo</th>
@@ -45,6 +50,7 @@
         </thead>
         <tbody id="tabelaFuncionarios"></tbody>
     </table>
+    <p id="mensagemVazia">Nenhum funcionário cadastrado.</p>
 
     <script src="js/funcionario.js"></script>
     <script src="js/app.js"></script>
